@@ -40,10 +40,13 @@
         },
         "baseUrl": {
             "type": "string"
+        },
+        "informaticaTags": {
+            "type": "object" 
         }
     },
     "variables": {
-        "publicDNSName": "[toLower(concat(parameters('dbVMName'), uniqueString(resourceGroup().id)))]",
+        "publicDNSName": "[toLower(concat(parameters('dbVMName'), uniqueString(resourceGroup().id, deployment().name)))]",
         "dbVMNicName": "[concat(parameters('dbVMName'), 'Nic')]",
         "dbOsType": "windows",
 
@@ -62,7 +65,8 @@
             "apiVersion": "2016-10-01",
             "dependsOn": [ ],
             "tags": {
-                "displayName": "PubIP01"
+                "displayName": "dbpublicip",
+                "provider": "[toUpper(parameters('informaticaTags').provider)]"
             },
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
@@ -80,16 +84,14 @@
                 "[concat('Microsoft.Network/publicIPAddresses/', variables('publicDNSName'))]"
             ],
             "tags": {
-                "displayName": "DBVMNic"
+                "displayName": "dbniccard",
+                "provider": "[toUpper(parameters('informaticaTags').provider)]"
             },
             "properties": {
                 "ipConfigurations": [
                     {
                         "name": "ipconfig1",
                         "properties": {
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
-                            },
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
                                 "id": "[parameters('SubnetId')]"
@@ -99,7 +101,10 @@
                             }
                         }
                     }
-                ]
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+                }
             }
         },
         {
@@ -116,7 +121,8 @@
                 "product": "[variables('imageOffer')]"
             },
             "tags": {
-                "displayName": "VM01"
+                "displayName": "dbvm",
+                "provider": "[toUpper(parameters('informaticaTags').provider)]"
             },
             "properties": {
                 "hardwareProfile": {
@@ -139,7 +145,7 @@
                         "caching": "ReadWrite",
                         "createOption": "FromImage",
                         "vhd": {
-                            "uri": "[concat('https://', parameters('storageName'), '.blob.core.windows.net/vhds/', parameters('dbVMName'), uniquestring(resourceGroup().id), '.osdisk.vhd')]"
+                            "uri": "[concat('https://', parameters('storageName'), '.blob.core.windows.net/vhds/', parameters('dbVMName'), uniqueString(resourceGroup().id, deployment().name), '.osdisk.vhd')]"
                         }
                     }
                 },
@@ -161,7 +167,8 @@
                         "[concat('Microsoft.Compute/virtualMachines/', parameters('dbVMName'))]"
                     ],
                     "tags": {
-                        "displayName": "ScriptExtDB"
+                        "displayName": "ScriptExtDB",
+                        "provider": "[toUpper(parameters('informaticaTags').provider)]"
                     },
                     "properties": {
                         "publisher": "Microsoft.Compute",

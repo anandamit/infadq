@@ -80,10 +80,13 @@
         },
         "baseUrl": {
             "type": "string"
+        },
+        "informaticaTags": {
+            "type": "object" 
         }
     },
     "variables": {
-        "nodeVMDNSName": "[toLower(concat(parameters('nodeVMNamePrefix'), uniqueString(resourceGroup().id)))]",
+        "nodeVMDNSName": "[toLower(concat(parameters('nodeVMNamePrefix'), uniqueString(resourceGroup().id, deployment().name)))]",
         "nodeVMNicPrefix": "[concat(parameters('nodeVMNamePrefix'),'Nic')]",
 
         "gatewayCount": "[sub(parameters('nodeVMCount'), 1)]",
@@ -111,7 +114,8 @@
             "dependsOn": [ ],
 
             "tags": {
-                "displayName": "publicip"
+                "displayName": "publicip",
+                "provider": "[toUpper(parameters('informaticaTags').provider)]"
             },
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
@@ -129,7 +133,8 @@
                 "[concat('Microsoft.Network/publicIPAddresses/', variables('nodeVMDNSName'), '1')]"
             ],
             "tags": {
-                "displayName": "niccard"
+                "displayName": "niccard",
+                "provider": "[toUpper(parameters('informaticaTags').provider)]"
             },
             "properties": {
                 "ipConfigurations": [
@@ -142,13 +147,13 @@
                             },
                             "publicIPAddress": {
                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('nodeVMDNSName'), '1'))]"
-                            },
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
                             }
                         }
                     }
-                ]
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+                }
             }
         },
         {
@@ -165,7 +170,8 @@
                 "product": "[variables('imageOffer')]"
             },
             "tags": {
-                "displayName": "nodevm"
+                "displayName": "nodevm",
+                "provider": "[toUpper(parameters('informaticaTags').provider)]"
             },
             "properties": {
                 "hardwareProfile": {
@@ -198,7 +204,7 @@
                         "caching": "ReadWrite",
                         "createOption": "FromImage",
                         "vhd": {
-                            "uri": "[concat('https://', parameters('storageName'), '.blob.core.windows.net/vhds/', parameters('nodeVMNamePrefix'), uniquestring(resourceGroup().id), '1', '.osdisk.vhd')]"
+                            "uri": "[concat('https://', parameters('storageName'), '.blob.core.windows.net/vhds/', parameters('nodeVMNamePrefix'), uniqueString(resourceGroup().id, deployment().name), '1', '.osdisk.vhd')]"
                         }
                     }
                 },
@@ -220,7 +226,8 @@
                         "[concat('Microsoft.Compute/virtualMachines/', parameters('nodeVMNamePrefix'), '1')]"
                     ],
                     "tags": {
-                        "displayName": "informaticaextension"
+                        "displayName": "informaticaextension",
+                        "provider": "[toUpper(parameters('informaticaTags').provider)]"
                     },
                     "properties": {
                         "publisher": "Microsoft.OSTCExtensions",
@@ -250,7 +257,8 @@
                 "count": "[variables('gatewayCount')]"
             },
             "tags": {
-                "displayName": "gwpublicip"
+                "displayName": "gwpublicip",
+                "provider": "[toUpper(parameters('informaticaTags').provider)]"
             },
             "properties": {
                 "publicIPAllocationMethod": "Dynamic",
@@ -272,7 +280,8 @@
                 "count": "[variables('gatewayCount')]"
             },
             "tags": {
-                "displayName": "gwniccard"
+                "displayName": "gwniccard",
+                "provider": "[toUpper(parameters('informaticaTags').provider)]"
             },
             "properties": {
                 "ipConfigurations": [
@@ -285,13 +294,13 @@
                             },
                             "publicIPAddress": {
                                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('nodeVMDNSName'), add(copyIndex(), 2)))]"
-                            },
-                            "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
                             }
                         }
                     }
-                ]
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgName'))]"
+                }
             }
         },
         {
@@ -313,7 +322,8 @@
                 "count": "[variables('gatewayCount')]"
             },
             "tags": {
-                "displayName": "gwnodevm"
+                "displayName": "gwnodevm",
+                "provider": "[toUpper(parameters('informaticaTags').provider)]"
             },
             "properties": {
                 "hardwareProfile": {
@@ -346,7 +356,7 @@
                         "caching": "ReadWrite",
                         "createOption": "FromImage",
                         "vhd": {
-                            "uri": "[concat('https://', parameters('storageName'), '.blob.core.windows.net/vhds/', parameters('nodeVMNamePrefix'), uniquestring(resourceGroup().id), add(copyIndex(), 2), '.osdisk.vhd')]"
+                            "uri": "[concat('https://', parameters('storageName'), '.blob.core.windows.net/vhds/', parameters('nodeVMNamePrefix'), uniqueString(resourceGroup().id, deployment().name), add(copyIndex(), 2), '.osdisk.vhd')]"
                         }
                     }
                 },
@@ -368,7 +378,8 @@
                         "[concat('Microsoft.Compute/virtualMachines/', parameters('nodeVMNamePrefix'), add(copyIndex(), 2))]"
                     ],
                     "tags": {
-                        "displayName": "informaticaextension"
+                        "displayName": "informaticaextension",
+                        "provider": "[toUpper(parameters('informaticaTags').provider)]"
                     },
                     "properties": {
                         "publisher": "Microsoft.OSTCExtensions",
